@@ -32,9 +32,7 @@ from models.schemas import (
     TriageResult,
 )
 from db.vector_store import VectorStore
-from agents.anamnesis import AnamnesisAgent
-from agents.triage import TriageAgent
-from agents.routing import RoutingAgent
+from agents.crew import TriageCrew
 
 
 # =============================================================================
@@ -67,10 +65,9 @@ async def lifespan(app: FastAPI):
     print("Initializing ChromaDB vector store...")
     app.state.vector_store = VectorStore()
 
-    # Initialize agents
-    app.state.anamnesis_agent = AnamnesisAgent()
-    app.state.triage_agent = TriageAgent(app.state.vector_store)
-    app.state.routing_agent = RoutingAgent(app.state.vector_store)
+    # Initialize CrewAI-based triage crew
+    print("Initializing CrewAI Triage Crew...")
+    app.state.triage_crew = TriageCrew(app.state.vector_store)
 
     print("Triage AI ready!")
 
@@ -150,27 +147,24 @@ async def chat(message: ChatMessage) -> ChatResponse:
     if session.is_complete:
         raise HTTPException(status_code=400, detail="Session already complete")
 
-    # Store the answer
-    session.answers[session.current_question] = message.message
-
     # Handle language selection (question 0)
     if session.current_question == 0:
-        # Validate and store language preference
-        language_code = message.message.strip()
-        if language_code not in LANGUAGE_OPTIONS:
-            raise HTTPException(status_code=400, detail="Invalid language selection")
-
-        session.language = language_code
+        # Validate language selection
+        if message.message not in LANGUAGE_OPTIONS:
+            message.message = "en"  # Default to English
+        session.language = message.message
         session.current_question = 1
 
-        # Return first actual question in selected language
-        next_question_text = get_question_text(1, session.language)
+        # Return first question in selected language
         return ChatResponse(
             session_id=message.session_id,
             question_number=1,
-            next_question=next_question_text,
+            next_question=get_first_question(session.language),
             is_complete=False,
         )
+
+    # Store the answer
+    session.answers[session.current_question] = message.message
 
     # Move to next question
     session.current_question += 1
@@ -223,18 +217,17 @@ async def process_triage(request: ProcessRequest) -> ProcessResponse:
     job_id = str(uuid.uuid4())
     job_results[job_id] = None  # Placeholder
 
-    # Process through agents (in production, this would be async/background)
+    # Process through CrewAI orchestrated agents
     try:
-        # Agent 1: Structure the anamnesis
-        anamnesis = await app.state.anamnesis_agent.process(session.answers, session.language)
+        # Run the full triage pipeline through CrewAI
+        anamnesis, classification, routing = await app.state.triage_crew.process(
+            session.answers,
+            language=session.language
+        )
+
+        # Store results in session
         session.anamnesis = anamnesis
-
-        # Agent 2: Classify with triage
-        classification = await app.state.triage_agent.classify(anamnesis, language=session.language)
         session.classification = classification
-
-        # Agent 3: Route to department
-        routing = await app.state.routing_agent.route(anamnesis, classification, language=session.language)
         session.routing = routing
 
         # Create final result

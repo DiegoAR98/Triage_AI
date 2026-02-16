@@ -5,6 +5,9 @@ uvicorn[standard]==0.30.6
 # LLM Provider (OpenAI-compatible for TARS API)
 openai==1.58.1
 
+# Multi-Agent Orchestration
+crewai>=1.0.0
+
 # Vector Database
 chromadb==0.5.15
 
