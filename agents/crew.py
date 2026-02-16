@@ -124,7 +124,7 @@ class TriageCrew:
         """
         self.vector_store = vector_store
         self.llm = LLM(
-            model="openai/tars-latest",
+            model="openai/claude-sonnet-4-5",
             api_key=os.getenv("TARS_API_KEY"),
             base_url=os.getenv("TARS_API_URL"),
         )
