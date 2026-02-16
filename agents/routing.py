@@ -49,6 +49,7 @@ class RoutingAgent:
         classification: TriageClassification,
         routing_rules: list[str],
         preliminary_orders: list[str],
+        language: str = "en",
     ) -> str:
         """Build the routing prompt.
 
@@ -57,12 +58,20 @@ class RoutingAgent:
             classification: Triage classification
             routing_rules: Relevant routing rules from ChromaDB
             preliminary_orders: Relevant preliminary orders from ChromaDB
+            language: Patient's language (en, es, pt-BR)
 
         Returns:
             Formatted prompt string
         """
         rules_text = "\n".join(f"- {r}" for r in routing_rules)
         orders_text = "\n".join(f"- {o}" for o in preliminary_orders)
+
+        language_names = {
+            "en": "English",
+            "es": "Spanish",
+            "pt-BR": "Portuguese (Brazilian)"
+        }
+        language_name = language_names.get(language, "English")
 
         allergies_warning = ""
         if anamnesis.allergies:
@@ -74,6 +83,12 @@ You MUST check if any preliminary orders might conflict with these allergies.
 """
 
         return f"""You are a hospital routing specialist. Your task is to direct a triaged patient to the appropriate department and generate preliminary orders.
+
+## IMPORTANT: Language Context
+The patient's data is in **{language_name}**. You must:
+1. Understand the symptoms and data in their original language
+2. Match them against the English routing rules and orders provided
+3. **Output preliminary_orders, contraindications, and notes_for_staff in {language_name}**
 
 ## Patient Information:
 
@@ -119,28 +134,30 @@ You MUST check if any preliminary orders might conflict with these allergies.
 
 ## Response Format:
 
-Respond with ONLY a valid JSON object:
+Respond with ONLY a valid JSON object. **IMPORTANT: Write preliminary_orders, contraindications, and notes_for_staff in {language_name}**:
 {{
     "department": "Department name",
     "doctor_type": "Specialist type (e.g., Cardiologist, Orthopedic Surgeon)",
     "urgency": "Immediate" | "Within 30 min" | "Within 1 hour" | "Standard",
     "room_type": "Emergency bay" | "Consultation room" | "Trauma bay" | null,
-    "preliminary_orders": ["list", "of", "orders"],
-    "contraindications": ["list of things to avoid due to allergies"],
-    "notes_for_staff": "Brief summary for receiving staff"
+    "preliminary_orders": ["list of orders in {language_name}"],
+    "contraindications": ["list of things to avoid in {language_name}"],
+    "notes_for_staff": "Brief summary for receiving staff in {language_name}"
 }}
 """
 
     async def route(
         self,
         anamnesis: Anamnesis,
-        classification: TriageClassification
+        classification: TriageClassification,
+        language: str = "en"
     ) -> Routing:
         """Route patient to appropriate department with orders.
 
         Args:
             anamnesis: Patient data
             classification: Triage classification
+            language: Patient's language for output (en, es, pt-BR)
 
         Returns:
             Routing with department, orders, and contraindications
@@ -165,6 +182,7 @@ Respond with ONLY a valid JSON object:
             classification,
             routing_rules,
             preliminary_orders,
+            language,
         )
 
         response = self.client.chat.completions.create(

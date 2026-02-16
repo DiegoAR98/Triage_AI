@@ -230,11 +230,11 @@ async def process_triage(request: ProcessRequest) -> ProcessResponse:
         session.anamnesis = anamnesis
 
         # Agent 2: Classify with triage
-        classification = await app.state.triage_agent.classify(anamnesis)
+        classification = await app.state.triage_agent.classify(anamnesis, language=session.language)
         session.classification = classification
 
         # Agent 3: Route to department
-        routing = await app.state.routing_agent.route(anamnesis, classification)
+        routing = await app.state.routing_agent.route(anamnesis, classification, language=session.language)
         session.routing = routing
 
         # Create final result

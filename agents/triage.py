@@ -41,20 +41,35 @@ class TriageAgent:
     def _build_prompt(
         self,
         anamnesis: Anamnesis,
-        relevant_protocols: list[str]
+        relevant_protocols: list[str],
+        language: str = "en"
     ) -> str:
         """Build the classification prompt.
 
         Args:
             anamnesis: Structured patient data
             relevant_protocols: Matching protocols from ChromaDB
+            language: Patient's language (en, es, pt-BR)
 
         Returns:
             Formatted prompt string
         """
         protocols_text = "\n".join(f"- {p}" for p in relevant_protocols)
 
+        language_names = {
+            "en": "English",
+            "es": "Spanish",
+            "pt-BR": "Portuguese (Brazilian)"
+        }
+        language_name = language_names.get(language, "English")
+
         return f"""You are an emergency department triage specialist. Your task is to classify a patient using the Manchester Triage Protocol.
+
+## IMPORTANT: Language Context
+The patient's anamnesis data is in **{language_name}**. The symptoms and medical terms are in the patient's language. You must:
+1. Understand the symptoms in their original language
+2. Match them against the English protocols provided
+3. **Output your reasoning in {language_name}** (same language as the patient)
 
 ## Patient Anamnesis:
 
@@ -90,20 +105,21 @@ class TriageAgent:
 
 ## Response Format:
 
-Respond with ONLY a valid JSON object:
+Respond with ONLY a valid JSON object. **IMPORTANT: Write reasoning and risk_factors in {language_name}**:
 {{
     "color": "RED" | "YELLOW" | "GREEN" | "BLUE",
-    "reasoning": "Brief explanation of why this classification was assigned",
-    "risk_factors": ["list", "of", "identified", "risks"],
-    "matched_protocols": ["protocols", "that", "matched"]
+    "reasoning": "Brief explanation in {language_name} of why this classification was assigned",
+    "risk_factors": ["list of identified risks in {language_name}"],
+    "matched_protocols": ["protocols that matched (can be in English)"]
 }}
 """
 
-    async def classify(self, anamnesis: Anamnesis) -> TriageClassification:
+    async def classify(self, anamnesis: Anamnesis, language: str = "en") -> TriageClassification:
         """Classify patient urgency using Manchester Triage Protocol.
 
         Args:
             anamnesis: Structured patient data
+            language: Patient's language for output (en, es, pt-BR)
 
         Returns:
             TriageClassification with color, priority, and reasoning
@@ -118,7 +134,7 @@ Respond with ONLY a valid JSON object:
         )
 
         # Build and send prompt
-        prompt = self._build_prompt(anamnesis, relevant_protocols)
+        prompt = self._build_prompt(anamnesis, relevant_protocols, language)
 
         response = self.client.chat.completions.create(
             model=self.model,

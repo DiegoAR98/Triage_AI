@@ -52,7 +52,7 @@ class AnamnesisAgent:
 
         return f"""You are a medical data extraction assistant. Your task is to analyze patient responses from a triage intake interview and extract structured medical information.
 
-NOTE: The patient's responses are in {language_name}. Extract information regardless of the input language, but output field values in medical English terminology where appropriate.
+NOTE: The patient's responses are in {language_name}. Extract and structure all information keeping the output in {language_name}. Keep medical terms, symptom descriptions, and chief complaint in the patient's language.
 
 ## Patient Responses:
 
