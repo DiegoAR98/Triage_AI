@@ -10,6 +10,7 @@ from .schemas import (
     TriageColor,
     Priority,
     Urgency,
+    Language,
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     "TriageColor",
     "Priority",
     "Urgency",
+    "Language",
 ]

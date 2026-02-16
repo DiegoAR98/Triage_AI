@@ -1,119 +1,201 @@
 """Predefined anamnesis questions for the chat interface.
 
-These questions follow a structured order to collect patient information
-as defined in SRS Section 6.
+Supports multiple languages: English, Spanish, Portuguese (Brazil)
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class AnamnesisQuestion:
-    """Represents a single anamnesis question."""
+    """Represents a single anamnesis question with translations."""
 
     number: int
-    question: str
     field_name: str
     description: str
+    translations: dict[str, str] = field(default_factory=dict)
+
+    def get_question(self, language: str = "en") -> str:
+        """Get the question text in the specified language."""
+        return self.translations.get(language, self.translations.get("en", ""))
 
 
-# Predefined questions for patient intake
+# Language selection options
+LANGUAGE_OPTIONS = {
+    "en": "English",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+}
+
+# Welcome messages by language
+WELCOME_MESSAGES = {
+    "en": "Welcome to Triage AI. I'll ask you a few questions to understand your symptoms and help direct you to the right care.",
+    "es": "Bienvenido a Triage AI. Le haré algunas preguntas para entender sus síntomas y ayudarle a recibir la atención adecuada.",
+    "pt-BR": "Bem-vindo ao Triage AI. Farei algumas perguntas para entender seus sintomas e ajudá-lo a receber o atendimento adequado.",
+}
+
+# Language selection question
+LANGUAGE_QUESTION = {
+    "en": "Please select your preferred language:",
+    "es": "Por favor seleccione su idioma preferido:",
+    "pt-BR": "Por favor, selecione seu idioma preferido:",
+}
+
+
+# Predefined questions with translations
 ANAMNESIS_QUESTIONS: list[AnamnesisQuestion] = [
     # Patient Demographics (Questions 1-5)
     AnamnesisQuestion(
         number=1,
-        question="What is your full name?",
         field_name="patient_name",
-        description="Patient's full name"
+        description="Patient's full name",
+        translations={
+            "en": "What is your full name?",
+            "es": "¿Cuál es su nombre completo?",
+            "pt-BR": "Qual é o seu nome completo?",
+        }
     ),
     AnamnesisQuestion(
         number=2,
-        question="What is your date of birth?",
         field_name="date_of_birth",
-        description="Patient's date of birth"
+        description="Patient's date of birth",
+        translations={
+            "en": "What is your date of birth?",
+            "es": "¿Cuál es su fecha de nacimiento?",
+            "pt-BR": "Qual é a sua data de nascimento?",
+        }
     ),
     AnamnesisQuestion(
         number=3,
-        question="What is your phone number?",
         field_name="phone_number",
-        description="Contact phone number"
+        description="Contact phone number",
+        translations={
+            "en": "What is your phone number?",
+            "es": "¿Cuál es su número de teléfono?",
+            "pt-BR": "Qual é o seu número de telefone?",
+        }
     ),
     AnamnesisQuestion(
         number=4,
-        question="Emergency contact name (who should we call in case of emergency)?",
         field_name="emergency_contact_name",
-        description="Emergency contact person"
+        description="Emergency contact person",
+        translations={
+            "en": "Emergency contact name (who should we call in case of emergency)?",
+            "es": "Nombre del contacto de emergencia (¿a quién debemos llamar en caso de emergencia)?",
+            "pt-BR": "Nome do contato de emergência (quem devemos ligar em caso de emergência)?",
+        }
     ),
     AnamnesisQuestion(
         number=5,
-        question="Emergency contact phone number?",
         field_name="emergency_contact_phone",
-        description="Emergency contact phone"
+        description="Emergency contact phone",
+        translations={
+            "en": "Emergency contact phone number?",
+            "es": "¿Número de teléfono del contacto de emergencia?",
+            "pt-BR": "Número de telefone do contato de emergência?",
+        }
     ),
 
     # Chief Complaint & Symptoms (Questions 6-14)
     AnamnesisQuestion(
         number=6,
-        question="What brings you in today?",
         field_name="chief_complaint",
-        description="Main reason for visit"
+        description="Main reason for visit",
+        translations={
+            "en": "What brings you in today?",
+            "es": "¿Qué le trae hoy?",
+            "pt-BR": "O que o traz aqui hoje?",
+        }
     ),
     AnamnesisQuestion(
         number=7,
-        question="When did this start?",
         field_name="onset",
-        description="When symptoms started"
+        description="When symptoms started",
+        translations={
+            "en": "When did this start?",
+            "es": "¿Cuándo comenzó esto?",
+            "pt-BR": "Quando isso começou?",
+        }
     ),
     AnamnesisQuestion(
         number=8,
-        question="On a scale of 1-10, how severe is it?",
         field_name="pain_scale",
-        description="Severity rating"
+        description="Severity rating",
+        translations={
+            "en": "On a scale of 1-10, how severe is it?",
+            "es": "En una escala del 1 al 10, ¿qué tan severo es?",
+            "pt-BR": "Em uma escala de 1 a 10, qual a intensidade?",
+        }
     ),
     AnamnesisQuestion(
         number=9,
-        question="Where exactly is the problem located?",
         field_name="location",
-        description="Body location"
+        description="Body location",
+        translations={
+            "en": "Where exactly is the problem located?",
+            "es": "¿Dónde exactamente está ubicado el problema?",
+            "pt-BR": "Onde exatamente está localizado o problema?",
+        }
     ),
     AnamnesisQuestion(
         number=10,
-        question="Does the pain spread anywhere else?",
         field_name="radiation",
-        description="Pain radiation"
+        description="Pain radiation",
+        translations={
+            "en": "Does the pain spread anywhere else?",
+            "es": "¿El dolor se extiende a algún otro lugar?",
+            "pt-BR": "A dor se espalha para algum outro lugar?",
+        }
     ),
     AnamnesisQuestion(
         number=11,
-        question="Any other symptoms? (dizziness, nausea, fever, etc.)",
         field_name="associated_symptoms",
-        description="Associated symptoms"
+        description="Associated symptoms",
+        translations={
+            "en": "Any other symptoms? (dizziness, nausea, fever, etc.)",
+            "es": "¿Algún otro síntoma? (mareos, náuseas, fiebre, etc.)",
+            "pt-BR": "Algum outro sintoma? (tontura, náusea, febre, etc.)",
+        }
     ),
     AnamnesisQuestion(
         number=12,
-        question="Do you have any medical conditions?",
         field_name="medical_history",
-        description="Past medical history"
+        description="Past medical history",
+        translations={
+            "en": "Do you have any medical conditions?",
+            "es": "¿Tiene alguna condición médica?",
+            "pt-BR": "Você tem alguma condição médica?",
+        }
     ),
     AnamnesisQuestion(
         number=13,
-        question="What medications are you currently taking?",
         field_name="current_medications",
-        description="Current medications"
+        description="Current medications",
+        translations={
+            "en": "What medications are you currently taking?",
+            "es": "¿Qué medicamentos está tomando actualmente?",
+            "pt-BR": "Quais medicamentos você está tomando atualmente?",
+        }
     ),
     AnamnesisQuestion(
         number=14,
-        question="Do you have any allergies?",
         field_name="allergies",
-        description="Known allergies"
+        description="Known allergies",
+        translations={
+            "en": "Do you have any allergies?",
+            "es": "¿Tiene alguna alergia?",
+            "pt-BR": "Você tem alguma alergia?",
+        }
     ),
 ]
 
 
-def get_question(question_number: int) -> AnamnesisQuestion | None:
+def get_question(question_number: int, language: str = "en") -> AnamnesisQuestion | None:
     """Get a question by its number (1-indexed).
 
     Args:
-        question_number: The question number (1-9)
+        question_number: The question number (1-14)
+        language: Language code (en, es, pt-BR)
 
     Returns:
         The AnamnesisQuestion or None if out of range
@@ -123,20 +205,37 @@ def get_question(question_number: int) -> AnamnesisQuestion | None:
     return None
 
 
+def get_question_text(question_number: int, language: str = "en") -> str | None:
+    """Get the question text in the specified language.
+
+    Args:
+        question_number: The question number (1-14)
+        language: Language code (en, es, pt-BR)
+
+    Returns:
+        The question text or None if out of range
+    """
+    question = get_question(question_number, language)
+    if question:
+        return question.get_question(language)
+    return None
+
+
 def get_total_questions() -> int:
     """Get the total number of anamnesis questions."""
     return len(ANAMNESIS_QUESTIONS)
 
 
-def get_welcome_message() -> str:
-    """Get the initial welcome message for the chat."""
-    return (
-        "Welcome to Triage AI. I'll ask you a few questions to understand "
-        "your symptoms and help direct you to the right care. "
-        "Let's begin."
-    )
+def get_welcome_message(language: str = "en") -> str:
+    """Get the welcome message in the specified language."""
+    return WELCOME_MESSAGES.get(language, WELCOME_MESSAGES["en"])
 
 
-def get_first_question() -> str:
+def get_language_question(language: str = "en") -> str:
+    """Get the language selection question text."""
+    return LANGUAGE_QUESTION.get(language, LANGUAGE_QUESTION["en"])
+
+
+def get_first_question(language: str = "en") -> str:
     """Get the first question to start the anamnesis."""
-    return ANAMNESIS_QUESTIONS[0].question
+    return ANAMNESIS_QUESTIONS[0].get_question(language)

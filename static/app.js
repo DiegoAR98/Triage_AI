@@ -1,5 +1,5 @@
 /**
- * Triage AI - Frontend Application
+ * Triage AI - Frontend Application with Multilingual Support
  */
 
 // API base URL (empty for same-origin)
@@ -8,6 +8,8 @@ const API_BASE = '';
 // State
 let sessionId = null;
 let isComplete = false;
+let currentLanguage = 'en';
+let isLanguageSelection = false;
 
 // DOM Elements
 const chatScreen = document.getElementById('chat-screen');
@@ -20,6 +22,43 @@ const sendBtn = document.getElementById('send-btn');
 const newTriageBtn = document.getElementById('new-triage-btn');
 const resultContent = document.getElementById('result-content');
 
+// Translations for UI elements
+const translations = {
+    en: {
+        welcome: 'Welcome to Triage AI. I\'ll ask you a few questions to understand your symptoms and help direct you to the right care.',
+        selectLanguage: 'Please select your preferred language:',
+        processing: 'Thank you! Processing your information...',
+        errorConnect: 'Error connecting to server. Please refresh the page.',
+        errorSend: 'Error sending message. Please try again.',
+        errorProcess: 'Error processing your information. Please try again or start a new session.',
+        typeAnswer: 'Type your answer...',
+        send: 'Send',
+        newTriage: 'Start New Triage'
+    },
+    es: {
+        welcome: 'Bienvenido a Triage AI. Le haré algunas preguntas para entender sus síntomas y ayudarle a recibir la atención adecuada.',
+        selectLanguage: 'Por favor seleccione su idioma preferido:',
+        processing: '¡Gracias! Procesando su información...',
+        errorConnect: 'Error al conectar con el servidor. Por favor, actualice la página.',
+        errorSend: 'Error al enviar el mensaje. Por favor, inténtelo de nuevo.',
+        errorProcess: 'Error al procesar su información. Por favor, inténtelo de nuevo o inicie una nueva sesión.',
+        typeAnswer: 'Escriba su respuesta...',
+        send: 'Enviar',
+        newTriage: 'Iniciar Nuevo Triage'
+    },
+    'pt-BR': {
+        welcome: 'Bem-vindo ao Triage AI. Farei algumas perguntas para entender seus sintomas e ajudá-lo a receber o atendimento adequado.',
+        selectLanguage: 'Por favor, selecione seu idioma preferido:',
+        processing: 'Obrigado! Processando suas informações...',
+        errorConnect: 'Erro ao conectar ao servidor. Por favor, atualize a página.',
+        errorSend: 'Erro ao enviar a mensagem. Por favor, tente novamente.',
+        errorProcess: 'Erro ao processar suas informações. Por favor, tente novamente ou inicie uma nova sessão.',
+        typeAnswer: 'Digite sua resposta...',
+        send: 'Enviar',
+        newTriage: 'Iniciar Novo Triage'
+    }
+};
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     startNewSession();
@@ -30,19 +69,28 @@ chatForm.addEventListener('submit', handleSubmit);
 newTriageBtn.addEventListener('click', startNewSession);
 
 /**
+ * Get translated text for current language
+ */
+function t(key) {
+    return translations[currentLanguage]?.[key] || translations.en[key];
+}
+
+/**
  * Start a new triage session
  */
 async function startNewSession() {
     // Reset state
     sessionId = null;
     isComplete = false;
+    currentLanguage = 'en';
+    isLanguageSelection = false;
     chatMessages.innerHTML = '';
 
     // Show chat screen
     showScreen('chat');
 
-    // Add welcome message
-    addMessage('agent', 'Welcome to Triage AI. I\'ll ask you a few questions to understand your symptoms and help direct you to the right care.');
+    // Add welcome message in English (default)
+    addMessage('agent', translations.en.welcome);
 
     try {
         const response = await fetch(`${API_BASE}/api/session`, {
@@ -53,17 +101,108 @@ async function startNewSession() {
 
         const data = await response.json();
         sessionId = data.session_id;
+        isLanguageSelection = data.is_language_selection;
 
-        // Show first question
-        setTimeout(() => {
-            addMessage('agent', data.first_question);
-            userInput.focus();
-        }, 500);
+        // Show language selection
+        if (data.is_language_selection && data.language_options) {
+            setTimeout(() => {
+                addMessage('agent', translations.en.selectLanguage);
+                addLanguageButtons(data.language_options);
+            }, 500);
+        }
 
     } catch (error) {
         console.error('Error creating session:', error);
-        addMessage('system', 'Error connecting to server. Please refresh the page.');
+        addMessage('system', t('errorConnect'));
     }
+}
+
+/**
+ * Add language selection buttons
+ */
+function addLanguageButtons(languageOptions) {
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'language-buttons';
+
+    for (const [code, name] of Object.entries(languageOptions)) {
+        const button = document.createElement('button');
+        button.className = 'language-btn';
+        button.textContent = name;
+        button.setAttribute('data-language', code);
+        button.addEventListener('click', () => selectLanguage(code));
+        buttonContainer.appendChild(button);
+    }
+
+    chatMessages.appendChild(buttonContainer);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Disable text input during language selection
+    userInput.disabled = true;
+    sendBtn.disabled = true;
+}
+
+/**
+ * Handle language selection
+ */
+async function selectLanguage(languageCode) {
+    currentLanguage = languageCode;
+
+    // Remove language buttons
+    const buttonContainer = document.querySelector('.language-buttons');
+    if (buttonContainer) {
+        buttonContainer.remove();
+    }
+
+    // Show selected language as user message
+    const languageName = {
+        'en': 'English',
+        'es': 'Español',
+        'pt-BR': 'Português (Brasil)'
+    }[languageCode];
+    addMessage('user', languageName);
+
+    // Update UI text to selected language
+    updateUILanguage();
+
+    // Enable input
+    setInputEnabled(false);
+
+    try {
+        const response = await fetch(`${API_BASE}/api/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: sessionId,
+                message: languageCode,
+            }),
+        });
+
+        if (!response.ok) throw new Error('Failed to send language selection');
+
+        const data = await response.json();
+        isLanguageSelection = false;
+
+        // Show first question
+        setTimeout(() => {
+            addMessage('agent', data.next_question);
+            setInputEnabled(true);
+            userInput.focus();
+        }, 300);
+
+    } catch (error) {
+        console.error('Error selecting language:', error);
+        addMessage('system', t('errorSend'));
+        setInputEnabled(true);
+    }
+}
+
+/**
+ * Update UI elements to current language
+ */
+function updateUILanguage() {
+    userInput.placeholder = t('typeAnswer');
+    sendBtn.textContent = t('send');
+    newTriageBtn.textContent = t('newTriage');
 }
 
 /**
@@ -73,7 +212,7 @@ async function handleSubmit(e) {
     e.preventDefault();
 
     const message = userInput.value.trim();
-    if (!message || !sessionId) return;
+    if (!message || !sessionId || isLanguageSelection) return;
 
     // Disable input while processing
     setInputEnabled(false);
@@ -98,7 +237,7 @@ async function handleSubmit(e) {
 
         if (data.is_complete) {
             isComplete = true;
-            addMessage('system', 'Thank you! Processing your information...');
+            addMessage('system', t('processing'));
             setTimeout(() => processTriageResult(), 1000);
         } else {
             // Show next question
@@ -111,7 +250,7 @@ async function handleSubmit(e) {
 
     } catch (error) {
         console.error('Error sending message:', error);
-        addMessage('system', 'Error sending message. Please try again.');
+        addMessage('system', t('errorSend'));
         setInputEnabled(true);
     }
 }
@@ -121,6 +260,19 @@ async function handleSubmit(e) {
  */
 async function processTriageResult() {
     showScreen('processing');
+
+    // Update processing screen text based on language
+    document.getElementById('processing-title').textContent = {
+        'en': 'Processing your information...',
+        'es': 'Procesando su información...',
+        'pt-BR': 'Processando suas informações...'
+    }[currentLanguage] || 'Processing your information...';
+
+    document.getElementById('processing-subtitle').textContent = {
+        'en': 'Our AI agents are analyzing your symptoms',
+        'es': 'Nuestros agentes de IA están analizando sus síntomas',
+        'pt-BR': 'Nossos agentes de IA estão analisando seus sintomas'
+    }[currentLanguage] || 'Our AI agents are analyzing your symptoms';
 
     try {
         // Start processing
@@ -151,7 +303,7 @@ async function processTriageResult() {
     } catch (error) {
         console.error('Error processing triage:', error);
         showScreen('chat');
-        addMessage('system', 'Error processing your information. Please try again or start a new session.');
+        addMessage('system', t('errorProcess'));
     }
 }
 
@@ -168,6 +320,80 @@ function displayResult(result) {
         'BLUE': '🔵',
     };
 
+    const labels = {
+        en: {
+            patientInfo: 'Patient Information',
+            name: 'Name',
+            dob: 'Date of Birth',
+            phone: 'Phone',
+            emergencyContact: 'Emergency Contact',
+            clinicalSummary: 'Clinical Summary',
+            chiefComplaint: 'Chief Complaint',
+            severity: 'Severity',
+            onset: 'Onset',
+            location: 'Location',
+            associatedSymptoms: 'Associated Symptoms',
+            allergies: 'Allergies',
+            routing: 'Routing',
+            department: 'Department',
+            urgency: 'Urgency',
+            roomType: 'Room Type',
+            classificationReasoning: 'Classification Reasoning',
+            riskFactors: 'Risk Factors',
+            preliminaryOrders: 'Preliminary Orders',
+            contraindications: 'Contraindications',
+            notesForStaff: 'Notes for Staff'
+        },
+        es: {
+            patientInfo: 'Información del Paciente',
+            name: 'Nombre',
+            dob: 'Fecha de Nacimiento',
+            phone: 'Teléfono',
+            emergencyContact: 'Contacto de Emergencia',
+            clinicalSummary: 'Resumen Clínico',
+            chiefComplaint: 'Motivo Principal',
+            severity: 'Severidad',
+            onset: 'Inicio',
+            location: 'Ubicación',
+            associatedSymptoms: 'Síntomas Asociados',
+            allergies: 'Alergias',
+            routing: 'Derivación',
+            department: 'Departamento',
+            urgency: 'Urgencia',
+            roomType: 'Tipo de Sala',
+            classificationReasoning: 'Razonamiento de Clasificación',
+            riskFactors: 'Factores de Riesgo',
+            preliminaryOrders: 'Órdenes Preliminares',
+            contraindications: 'Contraindicaciones',
+            notesForStaff: 'Notas para el Personal'
+        },
+        'pt-BR': {
+            patientInfo: 'Informações do Paciente',
+            name: 'Nome',
+            dob: 'Data de Nascimento',
+            phone: 'Telefone',
+            emergencyContact: 'Contato de Emergência',
+            clinicalSummary: 'Resumo Clínico',
+            chiefComplaint: 'Queixa Principal',
+            severity: 'Severidade',
+            onset: 'Início',
+            location: 'Localização',
+            associatedSymptoms: 'Sintomas Associados',
+            allergies: 'Alergias',
+            routing: 'Encaminhamento',
+            department: 'Departamento',
+            urgency: 'Urgência',
+            roomType: 'Tipo de Sala',
+            classificationReasoning: 'Raciocínio da Classificação',
+            riskFactors: 'Fatores de Risco',
+            preliminaryOrders: 'Ordens Preliminares',
+            contraindications: 'Contraindicações',
+            notesForStaff: 'Notas para a Equipe'
+        }
+    };
+
+    const l = labels[currentLanguage] || labels.en;
+
     let html = `
         <div class="triage-badge ${classification.color}">
             <h2>${colorEmoji[classification.color]} ${classification.color} - ${classification.priority}</h2>
@@ -175,42 +401,42 @@ function displayResult(result) {
         </div>
 
         <div class="result-section">
-            <h3>Patient Information</h3>
-            <p><strong>Name:</strong> ${anamnesis.patient_name}</p>
-            <p><strong>Date of Birth:</strong> ${anamnesis.date_of_birth}</p>
-            ${anamnesis.phone_number ? `<p><strong>Phone:</strong> ${anamnesis.phone_number}</p>` : ''}
+            <h3>${l.patientInfo}</h3>
+            <p><strong>${l.name}:</strong> ${anamnesis.patient_name}</p>
+            <p><strong>${l.dob}:</strong> ${anamnesis.date_of_birth}</p>
+            ${anamnesis.phone_number ? `<p><strong>${l.phone}:</strong> ${anamnesis.phone_number}</p>` : ''}
             ${anamnesis.emergency_contact_name ? `
-                <p><strong>Emergency Contact:</strong> ${anamnesis.emergency_contact_name}
+                <p><strong>${l.emergencyContact}:</strong> ${anamnesis.emergency_contact_name}
                 ${anamnesis.emergency_contact_phone ? `(${anamnesis.emergency_contact_phone})` : ''}</p>
             ` : ''}
         </div>
 
         <div class="result-section">
-            <h3>Clinical Summary</h3>
-            <p><strong>Chief Complaint:</strong> ${anamnesis.chief_complaint}</p>
-            <p><strong>Severity:</strong> ${anamnesis.pain_scale || 'N/A'}/10</p>
-            <p><strong>Onset:</strong> ${anamnesis.onset}</p>
-            ${anamnesis.location ? `<p><strong>Location:</strong> ${anamnesis.location}</p>` : ''}
+            <h3>${l.clinicalSummary}</h3>
+            <p><strong>${l.chiefComplaint}:</strong> ${anamnesis.chief_complaint}</p>
+            <p><strong>${l.severity}:</strong> ${anamnesis.pain_scale || 'N/A'}/10</p>
+            <p><strong>${l.onset}:</strong> ${anamnesis.onset}</p>
+            ${anamnesis.location ? `<p><strong>${l.location}:</strong> ${anamnesis.location}</p>` : ''}
             ${anamnesis.associated_symptoms.length > 0 ? `
-                <p><strong>Associated Symptoms:</strong> ${anamnesis.associated_symptoms.join(', ')}</p>
+                <p><strong>${l.associatedSymptoms}:</strong> ${anamnesis.associated_symptoms.join(', ')}</p>
             ` : ''}
             ${anamnesis.allergies && anamnesis.allergies.length > 0 ? `
-                <p><strong>Allergies:</strong> <span style="color: #dc2626;">${anamnesis.allergies.join(', ')}</span></p>
+                <p><strong>${l.allergies}:</strong> <span style="color: #dc2626;">${anamnesis.allergies.join(', ')}</span></p>
             ` : ''}
         </div>
 
         <div class="result-section">
-            <h3>Routing</h3>
-            <p><strong>Department:</strong> ${routing.department}</p>
-            <p><strong>Urgency:</strong> ${routing.urgency}</p>
-            ${routing.room_type ? `<p><strong>Room Type:</strong> ${routing.room_type}</p>` : ''}
+            <h3>${l.routing}</h3>
+            <p><strong>${l.department}:</strong> ${routing.department}</p>
+            <p><strong>${l.urgency}:</strong> ${routing.urgency}</p>
+            ${routing.room_type ? `<p><strong>${l.roomType}:</strong> ${routing.room_type}</p>` : ''}
         </div>
 
         <div class="result-section">
-            <h3>Classification Reasoning</h3>
+            <h3>${l.classificationReasoning}</h3>
             <p>${classification.reasoning}</p>
             ${classification.risk_factors.length > 0 ? `
-                <p><strong>Risk Factors:</strong></p>
+                <p><strong>${l.riskFactors}:</strong></p>
                 <ul>
                     ${classification.risk_factors.map(f => `<li>${f}</li>`).join('')}
                 </ul>
@@ -221,7 +447,7 @@ function displayResult(result) {
     if (routing.preliminary_orders.length > 0) {
         html += `
             <div class="result-section">
-                <h3>Preliminary Orders</h3>
+                <h3>${l.preliminaryOrders}</h3>
                 <ul>
                     ${routing.preliminary_orders.map(o => `<li>${o}</li>`).join('')}
                 </ul>
@@ -232,7 +458,7 @@ function displayResult(result) {
     if (routing.contraindications.length > 0) {
         html += `
             <div class="result-section contraindications">
-                <h3>Contraindications</h3>
+                <h3>${l.contraindications}</h3>
                 <ul>
                     ${routing.contraindications.map(c => `<li>${c}</li>`).join('')}
                 </ul>
@@ -243,7 +469,7 @@ function displayResult(result) {
     if (routing.notes_for_staff) {
         html += `
             <div class="result-section">
-                <h3>Notes for Staff</h3>
+                <h3>${l.notesForStaff}</h3>
                 <p>${routing.notes_for_staff}</p>
             </div>
         `;
@@ -257,12 +483,26 @@ function displayResult(result) {
  */
 function getWaitTime(color) {
     const times = {
-        'RED': 'Immediate attention required',
-        'YELLOW': 'Wait time: 30-60 minutes',
-        'GREEN': 'Wait time: 1-4 hours',
-        'BLUE': 'Wait time: 4+ hours',
+        en: {
+            'RED': 'Immediate attention required',
+            'YELLOW': 'Wait time: 30-60 minutes',
+            'GREEN': 'Wait time: 1-4 hours',
+            'BLUE': 'Wait time: 4+ hours',
+        },
+        es: {
+            'RED': 'Se requiere atención inmediata',
+            'YELLOW': 'Tiempo de espera: 30-60 minutos',
+            'GREEN': 'Tiempo de espera: 1-4 horas',
+            'BLUE': 'Tiempo de espera: más de 4 horas',
+        },
+        'pt-BR': {
+            'RED': 'Atenção imediata necessária',
+            'YELLOW': 'Tempo de espera: 30-60 minutos',
+            'GREEN': 'Tempo de espera: 1-4 horas',
+            'BLUE': 'Tempo de espera: mais de 4 horas',
+        }
     };
-    return times[color] || '';
+    return times[currentLanguage]?.[color] || times.en[color] || '';
 }
 
 /**

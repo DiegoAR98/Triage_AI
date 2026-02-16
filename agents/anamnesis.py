@@ -11,6 +11,14 @@ from models.schemas import Anamnesis
 from chat.questions import ANAMNESIS_QUESTIONS
 
 
+# Language names for display in prompts
+LANGUAGE_NAMES = {
+    "en": "English",
+    "es": "Spanish",
+    "pt-BR": "Portuguese (Brazil)",
+}
+
+
 class AnamnesisAgent:
     """Agent that structures raw patient answers into medical anamnesis data."""
 
@@ -22,24 +30,29 @@ class AnamnesisAgent:
         )
         self.model = "tars-latest"
 
-    def _build_prompt(self, answers: dict[int, str]) -> str:
+    def _build_prompt(self, answers: dict[int, str], language: str = "en") -> str:
         """Build the prompt for structuring anamnesis data.
 
         Args:
             answers: Dictionary mapping question number to patient answer
+            language: Patient's preferred language code
 
         Returns:
             Formatted prompt string
         """
-        # Build Q&A pairs
+        # Build Q&A pairs in the patient's language
         qa_pairs = []
         for q in ANAMNESIS_QUESTIONS:
             answer = answers.get(q.number, "Not provided")
-            qa_pairs.append(f"Q{q.number}: {q.question}\nA: {answer}")
+            question_text = q.get_question(language)
+            qa_pairs.append(f"Q{q.number}: {question_text}\nA: {answer}")
 
         qa_text = "\n\n".join(qa_pairs)
+        language_name = LANGUAGE_NAMES.get(language, "English")
 
         return f"""You are a medical data extraction assistant. Your task is to analyze patient responses from a triage intake interview and extract structured medical information.
+
+NOTE: The patient's responses are in {language_name}. Extract information regardless of the input language, but output field values in medical English terminology where appropriate.
 
 ## Patient Responses:
 
@@ -83,6 +96,7 @@ Extract and structure the information into a medical anamnesis. Follow these gui
 
 Respond with ONLY a valid JSON object matching this structure:
 {{
+    "language": "string (language code: en, es, or pt-BR)",
     "patient_name": "string",
     "date_of_birth": "string",
     "phone_number": "string or null",
@@ -104,16 +118,17 @@ Respond with ONLY a valid JSON object matching this structure:
 If information is not provided or unclear, use null for optional fields or empty arrays for lists.
 """
 
-    async def process(self, answers: dict[int, str]) -> Anamnesis:
+    async def process(self, answers: dict[int, str], language: str = "en") -> Anamnesis:
         """Process patient answers into structured Anamnesis.
 
         Args:
             answers: Dictionary mapping question number to patient answer
+            language: Patient's preferred language code
 
         Returns:
             Structured Anamnesis object
         """
-        prompt = self._build_prompt(answers)
+        prompt = self._build_prompt(answers, language)
 
         response = self.client.chat.completions.create(
             model=self.model,

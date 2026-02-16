@@ -14,7 +14,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from chat.questions import get_question, get_total_questions, get_first_question
+from chat.questions import (
+    get_question,
+    get_total_questions,
+    get_first_question,
+    get_question_text,
+    get_welcome_message,
+    LANGUAGE_OPTIONS,
+)
 from models.schemas import (
     ChatMessage,
     ChatResponse,
@@ -112,14 +119,16 @@ async def create_session() -> dict:
 
     Returns:
         session_id: Unique session identifier
-        first_question: The first anamnesis question
+        language_options: Available language options
+        is_language_selection: Whether this is the language selection step
     """
     session_id = str(uuid.uuid4())
     sessions[session_id] = SessionData(session_id=session_id)
 
     return {
         "session_id": session_id,
-        "first_question": get_first_question(),
+        "language_options": LANGUAGE_OPTIONS,
+        "is_language_selection": True,
     }
 
 
@@ -144,6 +153,25 @@ async def chat(message: ChatMessage) -> ChatResponse:
     # Store the answer
     session.answers[session.current_question] = message.message
 
+    # Handle language selection (question 0)
+    if session.current_question == 0:
+        # Validate and store language preference
+        language_code = message.message.strip()
+        if language_code not in LANGUAGE_OPTIONS:
+            raise HTTPException(status_code=400, detail="Invalid language selection")
+
+        session.language = language_code
+        session.current_question = 1
+
+        # Return first actual question in selected language
+        next_question_text = get_question_text(1, session.language)
+        return ChatResponse(
+            session_id=message.session_id,
+            question_number=1,
+            next_question=next_question_text,
+            is_complete=False,
+        )
+
     # Move to next question
     session.current_question += 1
 
@@ -159,13 +187,13 @@ async def chat(message: ChatMessage) -> ChatResponse:
             is_complete=True,
         )
 
-    # Get next question
-    next_q = get_question(session.current_question)
+    # Get next question in user's language
+    next_question_text = get_question_text(session.current_question, session.language)
 
     return ChatResponse(
         session_id=message.session_id,
         question_number=session.current_question,
-        next_question=next_q.question if next_q else None,
+        next_question=next_question_text,
         is_complete=False,
     )
 
@@ -198,7 +226,7 @@ async def process_triage(request: ProcessRequest) -> ProcessResponse:
     # Process through agents (in production, this would be async/background)
     try:
         # Agent 1: Structure the anamnesis
-        anamnesis = await app.state.anamnesis_agent.process(session.answers)
+        anamnesis = await app.state.anamnesis_agent.process(session.answers, session.language)
         session.anamnesis = anamnesis
 
         # Agent 2: Classify with triage
@@ -264,6 +292,7 @@ async def get_session(session_id: str) -> dict:
         "current_question": session.current_question,
         "is_complete": session.is_complete,
         "answers_count": len(session.answers),
+        "language": session.language,
     }
 
 

@@ -29,12 +29,25 @@ class Urgency(str, Enum):
     STANDARD = "Standard"
 
 
+class Language(str, Enum):
+    """Supported languages."""
+    ENGLISH = "en"
+    SPANISH = "es"
+    PORTUGUESE = "pt-BR"
+
+
 # =============================================================================
 # Core Data Models (from SRS Section 5)
 # =============================================================================
 
 class Anamnesis(BaseModel):
     """Structured patient anamnesis data collected during intake."""
+
+    # Language preference
+    language: str = Field(
+        default="en",
+        description="Patient's preferred language"
+    )
 
     # Patient Demographics
     patient_name: str = Field(
@@ -254,13 +267,17 @@ class SessionData(BaseModel):
     """Internal session storage model."""
 
     session_id: str
+    language: str = Field(
+        default="en",
+        description="Patient's preferred language"
+    )
     answers: dict[int, str] = Field(
         default_factory=dict,
         description="Question number to answer mapping"
     )
     current_question: int = Field(
-        default=1,
-        description="Current question number"
+        default=0,  # 0 = language selection, 1+ = actual questions
+        description="Current question number (0 = language selection)"
     )
     is_complete: bool = Field(
         default=False
