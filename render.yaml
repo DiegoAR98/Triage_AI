@@ -1,0 +1,41 @@
+# Render deployment configuration for Triage AI
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: triage-ai
+    runtime: python
+    region: ohio  # or oregon, frankfurt, singapore
+
+    # Build configuration
+    buildCommand: |
+      pip install -r requirements.txt
+      python -m db.seed_data
+
+    # Start command
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+    # Environment variables
+    envVars:
+      - key: TARS_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: TARS_API_URL
+        value: "https://api.router.tetrate.ai/v1"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+    # Health check
+    healthCheckPath: /api/health
+
+    # Auto-deploy on push
+    autoDeploy: true
+
+    # Instance type (free tier for MVP)
+    plan: free
+
+    # Persistent disk for ChromaDB (optional, for data persistence)
+    # Uncomment for persistent storage:
+    # disk:
+    #   name: chroma-data
+    #   mountPath: /opt/render/project/src/chroma_data
+    #   sizeGB: 1

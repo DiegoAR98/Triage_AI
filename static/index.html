@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triage AI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🏥 Triage AI</h1>
+            <p>Manchester Triage Protocol Assessment</p>
+        </header>
+
+        <!-- Chat Screen -->
+        <main id="chat-screen" class="screen">
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages will be inserted here -->
+            </div>
+
+            <form id="chat-form" class="chat-input-form">
+                <input
+                    type="text"
+                    id="user-input"
+                    placeholder="Type your answer..."
+                    autocomplete="off"
+                    required
+                >
+                <button type="submit" id="send-btn">Send</button>
+            </form>
+        </main>
+
+        <!-- Processing Screen -->
+        <div id="processing-screen" class="screen hidden">
+            <div class="processing-content">
+                <div class="spinner"></div>
+                <h2>Processing your information...</h2>
+                <p>Our AI agents are analyzing your symptoms</p>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="screen hidden">
+            <div id="result-content" class="result-content">
+                <!-- Result will be inserted here -->
+            </div>
+            <button id="new-triage-btn" class="btn-primary">Start New Triage</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
