@@ -1,1 +1,18 @@
+# 1. Create virtual environment
+.\venv\Scripts\activate
 
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Copy env file and add your API key
+cp .env.example .env
+# Edit .env and add your TARS_API_KEY and TARS_API_URL
+
+# 4. Seed the database
+python -m db.seed_data
+
+# 5. Run the server
+python main.py
+# Or: uvicorn main:app --reload
+
+http://127.0.0.1:8000/
