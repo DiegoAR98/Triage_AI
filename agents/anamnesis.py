@@ -49,32 +49,45 @@ class AnamnesisAgent:
 
 Extract and structure the information into a medical anamnesis. Follow these guidelines:
 
-1. **chief_complaint**: Identify the main reason for the visit in medical terminology (e.g., "chest pain" instead of "my chest hurts")
+### Patient Demographics:
+1. **patient_name**: Extract the patient's full name exactly as provided
+2. **date_of_birth**: Extract date of birth in the format provided
+3. **phone_number**: Extract phone number if provided
+4. **emergency_contact_name**: Extract emergency contact person's name
+5. **emergency_contact_phone**: Extract emergency contact phone number
 
-2. **onset**: Extract when symptoms started (e.g., "2 hours ago", "yesterday morning")
+### Medical Information:
+6. **chief_complaint**: Identify the main reason for the visit in medical terminology (e.g., "chest pain" instead of "my chest hurts")
 
-3. **pain_scale**: Extract numeric value 1-10. If not numeric, estimate based on descriptors (severe=8-10, moderate=5-7, mild=1-4)
+7. **onset**: Extract when symptoms started (e.g., "2 hours ago", "yesterday morning")
 
-4. **location**: Body location using anatomical terms where appropriate
+8. **pain_scale**: Extract numeric value 1-10. If not numeric, estimate based on descriptors (severe=8-10, moderate=5-7, mild=1-4)
 
-5. **radiation**: Where pain spreads to, if mentioned
+9. **location**: Body location using anatomical terms where appropriate
 
-6. **associated_symptoms**: List of other symptoms. Convert lay terms to medical terminology:
+10. **radiation**: Where pain spreads to, if mentioned
+
+11. **associated_symptoms**: List of other symptoms. Convert lay terms to medical terminology:
    - "sweating" → "diaphoresis"
    - "throwing up" → "nausea/vomiting"
    - "hard to breathe" → "dyspnea"
    - "dizzy" → "dizziness/vertigo"
 
-7. **medical_history**: List of past medical conditions
+12. **medical_history**: List of past medical conditions
 
-8. **current_medications**: List of medications
+13. **current_medications**: List of medications
 
-9. **allergies**: List of allergies (especially drug allergies)
+14. **allergies**: List of allergies (especially drug allergies)
 
 ## Response Format:
 
 Respond with ONLY a valid JSON object matching this structure:
 {{
+    "patient_name": "string",
+    "date_of_birth": "string",
+    "phone_number": "string or null",
+    "emergency_contact_name": "string or null",
+    "emergency_contact_phone": "string or null",
     "chief_complaint": "string",
     "onset": "string",
     "duration": "string or null",

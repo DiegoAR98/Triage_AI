@@ -36,6 +36,29 @@ class Urgency(str, Enum):
 class Anamnesis(BaseModel):
     """Structured patient anamnesis data collected during intake."""
 
+    # Patient Demographics
+    patient_name: str = Field(
+        ...,
+        description="Patient's full name"
+    )
+    date_of_birth: str = Field(
+        ...,
+        description="Patient's date of birth"
+    )
+    phone_number: str | None = Field(
+        default=None,
+        description="Patient's contact phone number"
+    )
+    emergency_contact_name: str | None = Field(
+        default=None,
+        description="Emergency contact person's name"
+    )
+    emergency_contact_phone: str | None = Field(
+        default=None,
+        description="Emergency contact phone number"
+    )
+
+    # Chief Complaint
     chief_complaint: str = Field(
         ...,
         description="Main reason for visit"

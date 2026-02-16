@@ -17,58 +17,91 @@ class AnamnesisQuestion:
     description: str
 
 
-# Predefined questions from SRS Section 6
+# Predefined questions for patient intake
 ANAMNESIS_QUESTIONS: list[AnamnesisQuestion] = [
+    # Patient Demographics (Questions 1-5)
     AnamnesisQuestion(
         number=1,
+        question="What is your full name?",
+        field_name="patient_name",
+        description="Patient's full name"
+    ),
+    AnamnesisQuestion(
+        number=2,
+        question="What is your date of birth?",
+        field_name="date_of_birth",
+        description="Patient's date of birth"
+    ),
+    AnamnesisQuestion(
+        number=3,
+        question="What is your phone number?",
+        field_name="phone_number",
+        description="Contact phone number"
+    ),
+    AnamnesisQuestion(
+        number=4,
+        question="Emergency contact name (who should we call in case of emergency)?",
+        field_name="emergency_contact_name",
+        description="Emergency contact person"
+    ),
+    AnamnesisQuestion(
+        number=5,
+        question="Emergency contact phone number?",
+        field_name="emergency_contact_phone",
+        description="Emergency contact phone"
+    ),
+
+    # Chief Complaint & Symptoms (Questions 6-14)
+    AnamnesisQuestion(
+        number=6,
         question="What brings you in today?",
         field_name="chief_complaint",
         description="Main reason for visit"
     ),
     AnamnesisQuestion(
-        number=2,
+        number=7,
         question="When did this start?",
         field_name="onset",
         description="When symptoms started"
     ),
     AnamnesisQuestion(
-        number=3,
+        number=8,
         question="On a scale of 1-10, how severe is it?",
         field_name="pain_scale",
         description="Severity rating"
     ),
     AnamnesisQuestion(
-        number=4,
+        number=9,
         question="Where exactly is the problem located?",
         field_name="location",
         description="Body location"
     ),
     AnamnesisQuestion(
-        number=5,
+        number=10,
         question="Does the pain spread anywhere else?",
         field_name="radiation",
         description="Pain radiation"
     ),
     AnamnesisQuestion(
-        number=6,
+        number=11,
         question="Any other symptoms? (dizziness, nausea, fever, etc.)",
         field_name="associated_symptoms",
         description="Associated symptoms"
     ),
     AnamnesisQuestion(
-        number=7,
+        number=12,
         question="Do you have any medical conditions?",
         field_name="medical_history",
         description="Past medical history"
     ),
     AnamnesisQuestion(
-        number=8,
+        number=13,
         question="What medications are you currently taking?",
         field_name="current_medications",
         description="Current medications"
     ),
     AnamnesisQuestion(
-        number=9,
+        number=14,
         question="Do you have any allergies?",
         field_name="allergies",
         description="Known allergies"

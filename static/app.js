@@ -175,12 +175,27 @@ function displayResult(result) {
         </div>
 
         <div class="result-section">
-            <h3>Patient Summary</h3>
+            <h3>Patient Information</h3>
+            <p><strong>Name:</strong> ${anamnesis.patient_name}</p>
+            <p><strong>Date of Birth:</strong> ${anamnesis.date_of_birth}</p>
+            ${anamnesis.phone_number ? `<p><strong>Phone:</strong> ${anamnesis.phone_number}</p>` : ''}
+            ${anamnesis.emergency_contact_name ? `
+                <p><strong>Emergency Contact:</strong> ${anamnesis.emergency_contact_name}
+                ${anamnesis.emergency_contact_phone ? `(${anamnesis.emergency_contact_phone})` : ''}</p>
+            ` : ''}
+        </div>
+
+        <div class="result-section">
+            <h3>Clinical Summary</h3>
             <p><strong>Chief Complaint:</strong> ${anamnesis.chief_complaint}</p>
             <p><strong>Severity:</strong> ${anamnesis.pain_scale || 'N/A'}/10</p>
             <p><strong>Onset:</strong> ${anamnesis.onset}</p>
+            ${anamnesis.location ? `<p><strong>Location:</strong> ${anamnesis.location}</p>` : ''}
             ${anamnesis.associated_symptoms.length > 0 ? `
                 <p><strong>Associated Symptoms:</strong> ${anamnesis.associated_symptoms.join(', ')}</p>
+            ` : ''}
+            ${anamnesis.allergies && anamnesis.allergies.length > 0 ? `
+                <p><strong>Allergies:</strong> <span style="color: #dc2626;">${anamnesis.allergies.join(', ')}</span></p>
             ` : ''}
         </div>
 

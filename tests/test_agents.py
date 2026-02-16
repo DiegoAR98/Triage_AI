@@ -193,7 +193,7 @@ class TestQuestions:
         from chat.questions import get_total_questions
 
         total = get_total_questions()
-        assert total == 9  # As per SRS
+        assert total == 14  # 5 demographics + 9 medical
 
 
 if __name__ == "__main__":
