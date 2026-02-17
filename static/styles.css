@@ -307,6 +307,14 @@ body {
     transform: translateY(0);
 }
 
+.language-btn .flag {
+    margin-left: 0.5rem;
+    width: 24px;
+    height: 16px;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+
 /* Buttons */
 .btn-primary {
     display: block;

@@ -124,10 +124,16 @@ function addLanguageButtons(languageOptions) {
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'language-buttons';
 
+    const flags = {
+        'en': 'https://flagcdn.com/w40/us.png',
+        'es': 'https://flagcdn.com/w40/es.png',
+        'pt-BR': 'https://flagcdn.com/w40/br.png'
+    };
+
     for (const [code, name] of Object.entries(languageOptions)) {
         const button = document.createElement('button');
         button.className = 'language-btn';
-        button.textContent = name;
+        button.innerHTML = `${name} <img class="flag" src="${flags[code] || ''}" alt="${code}">`;
         button.setAttribute('data-language', code);
         button.addEventListener('click', () => selectLanguage(code));
         buttonContainer.appendChild(button);
