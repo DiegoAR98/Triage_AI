@@ -34,6 +34,7 @@ class Language(str, Enum):
     ENGLISH = "en"
     SPANISH = "es"
     PORTUGUESE = "pt-BR"
+    ITALIAN = "it"
 
 
 # =============================================================================

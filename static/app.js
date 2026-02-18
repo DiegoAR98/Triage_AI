@@ -56,6 +56,17 @@ const translations = {
         typeAnswer: 'Digite sua resposta...',
         send: 'Enviar',
         newTriage: 'Iniciar Novo Triage'
+    },
+    it: {
+        welcome: 'Benvenuto a Triage AI. Le farò alcune domande per comprendere i suoi sintomi e aiutarla a ricevere le cure appropriate.',
+        selectLanguage: 'Per favore, selezioni la lingua preferita:',
+        processing: 'Grazie! Elaborazione delle informazioni in corso...',
+        errorConnect: 'Errore di connessione al server. Per favore, aggiorna la pagina.',
+        errorSend: 'Errore nell\'invio del messaggio. Per favore, riprova.',
+        errorProcess: 'Errore nell\'elaborazione delle informazioni. Per favore, riprova o avvia una nuova sessione.',
+        typeAnswer: 'Scrivi la tua risposta...',
+        send: 'Invia',
+        newTriage: 'Inizia Nuovo Triage'
     }
 };
 
@@ -127,7 +138,8 @@ function addLanguageButtons(languageOptions) {
     const flags = {
         'en': 'https://flagcdn.com/w40/us.png',
         'es': 'https://flagcdn.com/w40/es.png',
-        'pt-BR': 'https://flagcdn.com/w40/br.png'
+        'pt-BR': 'https://flagcdn.com/w40/br.png',
+        'it': 'https://flagcdn.com/w40/it.png'
     };
 
     for (const [code, name] of Object.entries(languageOptions)) {
@@ -163,7 +175,8 @@ async function selectLanguage(languageCode) {
     const languageName = {
         'en': 'English',
         'es': 'Español',
-        'pt-BR': 'Português (Brasil)'
+        'pt-BR': 'Português (Brasil)',
+        'it': 'Italiano'
     }[languageCode];
     addMessage('user', languageName);
 
@@ -271,13 +284,15 @@ async function processTriageResult() {
     document.getElementById('processing-title').textContent = {
         'en': 'Processing your information...',
         'es': 'Procesando su información...',
-        'pt-BR': 'Processando suas informações...'
+        'pt-BR': 'Processando suas informações...',
+        'it': 'Elaborazione delle informazioni in corso...'
     }[currentLanguage] || 'Processing your information...';
 
     document.getElementById('processing-subtitle').textContent = {
         'en': 'Our AI agents are analyzing your symptoms',
         'es': 'Nuestros agentes de IA están analizando sus síntomas',
-        'pt-BR': 'Nossos agentes de IA estão analisando seus sintomas'
+        'pt-BR': 'Nossos agentes de IA estão analisando seus sintomas',
+        'it': 'I nostri agenti IA stanno analizzando i suoi sintomi'
     }[currentLanguage] || 'Our AI agents are analyzing your symptoms';
 
     try {
@@ -395,6 +410,29 @@ function displayResult(result) {
             preliminaryOrders: 'Ordens Preliminares',
             contraindications: 'Contraindicações',
             notesForStaff: 'Notas para a Equipe'
+        },
+        it: {
+            patientInfo: 'Informazioni del Paziente',
+            name: 'Nome',
+            dob: 'Data di Nascita',
+            phone: 'Telefono',
+            emergencyContact: 'Contatto di Emergenza',
+            clinicalSummary: 'Riepilogo Clinico',
+            chiefComplaint: 'Motivo Principale',
+            severity: 'Gravità',
+            onset: 'Insorgenza',
+            location: 'Localizzazione',
+            associatedSymptoms: 'Sintomi Associati',
+            allergies: 'Allergie',
+            routing: 'Indirizzamento',
+            department: 'Reparto',
+            urgency: 'Urgenza',
+            roomType: 'Tipo di Sala',
+            classificationReasoning: 'Ragionamento della Classificazione',
+            riskFactors: 'Fattori di Rischio',
+            preliminaryOrders: 'Ordini Preliminari',
+            contraindications: 'Controindicazioni',
+            notesForStaff: 'Note per il Personale'
         }
     };
 
@@ -506,6 +544,12 @@ function getWaitTime(color) {
             'YELLOW': 'Tempo de espera: 30-60 minutos',
             'GREEN': 'Tempo de espera: 1-4 horas',
             'BLUE': 'Tempo de espera: mais de 4 horas',
+        },
+        it: {
+            'RED': 'Attenzione immediata necessaria',
+            'YELLOW': 'Tempo di attesa: 30-60 minuti',
+            'GREEN': 'Tempo di attesa: 1-4 ore',
+            'BLUE': 'Tempo di attesa: oltre 4 ore',
         }
     };
     return times[currentLanguage]?.[color] || times.en[color] || '';

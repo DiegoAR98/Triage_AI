@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(winget:*)"
+      "Bash(winget:*)",
+      "Bash(pip install:*)",
+      "WebFetch(domain:flagcdn.com)"
     ]
   }
 }
