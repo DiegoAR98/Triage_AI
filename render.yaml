@@ -22,7 +22,7 @@ services:
       - key: TARS_API_URL
         value: "https://api.router.tetrate.ai/v1"
       - key: PYTHON_VERSION
-        value: "3.11.0"
+        value: "3.11.10"
 
     # Health check
     healthCheckPath: /api/health

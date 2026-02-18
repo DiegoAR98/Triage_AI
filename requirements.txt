@@ -3,7 +3,8 @@ fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 
 # Agent Orchestration (manages chromadb, pydantic, etc.)
-crewai>=1.0.0
+crewai[litellm]==1.9.3
+litellm==1.75.3
 
 # Environment Variables
 python-dotenv>=1.0.0

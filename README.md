@@ -20,7 +20,7 @@ Built for the **Tetrate AI Buildathon**, powered by the **TARS API** (Tetrate Ag
 - **Manchester Triage Classification** - Evidence-based RED/YELLOW/GREEN/BLUE urgency assessment
 - **Smart Department Routing** - 8 departments with preliminary medical orders
 - **Allergy/Contraindication Checking** - Safety flags for known allergies
-- **Fully Multilingual** - English, Spanish, and Portuguese (Brazil) with full medical term translation
+- **Fully Multilingual** - English, Spanish, Portuguese (Brazil), and Italian with full medical term translation
 - **Live Production Deployment** - Running on Render, accessible via URL
 - **CrewAI Agents** - Each agent is a specialized medical professional
 
@@ -35,7 +35,7 @@ Built for the **Tetrate AI Buildathon**, powered by the **TARS API** (Tetrate Ag
 |                    TRIAGE AI SYSTEM                         |
 +------------------------------------------------------------+
 |                                                            |
-|  FRONTEND (Vanilla JS, 3 Languages)                       |
+|  FRONTEND (Vanilla JS, 4 Languages)                       |
 |  +------------------------------------------------------+ |
 |  | Language Selection -> Chat Interface -> Results Panel | |
 |  +------------------------------------------------------+ |
@@ -74,7 +74,7 @@ Built for the **Tetrate AI Buildathon**, powered by the **TARS API** (Tetrate Ag
 | **LLM** | TARS API (OpenAI-compatible) | Tetrate Agent Router Service |
 | **Vector Database** | ChromaDB | In-memory vector search |
 | **Data Validation** | Pydantic 2.x | Type-safe models |
-| **Frontend** | Vanilla JS/HTML/CSS | No framework overhead |
+| **Frontend** | Vanilla JS/HTML/CSS (Inter font) | Clinical-grade responsive UI |
 | **Deployment** | Render (Free Tier) | Auto-scaling, HTTPS included |
 | **Runtime** | Python 3.11.10 | Long-term support version |
 
@@ -87,6 +87,7 @@ Built for the **Tetrate AI Buildathon**, powered by the **TARS API** (Tetrate Ag
 - **English** (en)
 - **Spanish** (es)
 - **Portuguese (Brazil)** (pt-BR)
+- **Italian** (it)
 
 ### What Gets Translated
 
@@ -257,7 +258,7 @@ Create a new triage session.
 ```json
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
-  "language_options": ["en", "es", "pt-BR"],
+  "language_options": ["en", "es", "pt-BR", "it"],
   "is_language_selection": true
 }
 ```
@@ -311,13 +312,10 @@ Triage_AI/
 |                                    # - Result retrieval
 |
 |-- agents/                          # CrewAI Agents
-|   |-- crew.py                      # TriageCrew orchestrator
-|   |                                # - Agent definitions
-|   |                                # - Task orchestration
-|   |                                # - Tool integration
-|   |-- anamnesis.py                 # Anamnesis Agent
-|   |-- triage.py                    # Triage Agent
-|   +-- routing.py                   # Routing Agent
+|   +-- crew.py                      # TriageCrew orchestrator
+|                                    # - Agent definitions (Anamnesis, Triage, Routing)
+|                                    # - Task orchestration
+|                                    # - Tool integration
 |
 |-- models/                          # Pydantic Data Models
 |   +-- schemas.py                   # Type definitions
@@ -327,7 +325,7 @@ Triage_AI/
 |   +-- seed_data.py                 # Data seeding script (82 protocols)
 |
 |-- chat/                            # Chat Flow
-|   +-- questions.py                 # 14 questions x 3 languages
+|   +-- questions.py                 # 14 questions x 4 languages
 |
 |-- static/                          # Frontend
 |   |-- index.html                   # Chat UI
@@ -335,7 +333,6 @@ Triage_AI/
 |   +-- styles.css                   # Styling
 |
 |-- requirements.txt                 # Dependencies (managed by CrewAI)
-|-- runtime.txt                      # Python 3.11.10
 |-- render.yaml                      # Render deployment blueprint
 |-- Dockerfile                       # Container deployment
 |
@@ -369,6 +366,8 @@ Triage_AI/
 4. **Deploy**
    - Click "Create Web Service"
    - Render automatically builds and deploys
+
+> **Note:** Render's free tier spins down after 15 minutes of inactivity, causing ~30 second cold starts on the next request. For production ER use, upgrade to a paid instance to avoid spin-down delays.
 
 ---
 
@@ -446,11 +445,11 @@ ruff check .
 
 | Feature | SRS Status | Implementation |
 |---------|-----------|-----------------|
-| Multi-language | Future enhancement | 3 languages (EN/ES/PT-BR) |
+| Multi-language | Future enhancement | 4 languages (EN/ES/PT-BR/IT) |
 | Demographic data | Not mentioned | Name, DOB, emergency contact |
 | CrewAI orchestration | Not specified | Full agent coordination |
 | Multilingual medical terms | Future enhancement | All terms fully translated |
-| UI translations | Future enhancement | Complete 3-language UI |
+| UI translations | Future enhancement | Complete 4-language UI |
 
 ---
 
