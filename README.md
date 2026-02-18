@@ -2,7 +2,7 @@
 
 > **Status:** Production-ready MVP
 > **Version:** 2.0
-> **Deployed on:** [Render](https://render.com)
+> **Deployed on:** [Render](https://triage-ai-h3gp.onrender.com/)
 > **SRS Document:** [DevDocs/TriateAI_SRS.md](DevDocs/TriateAI_SRS.md)
 
 ---

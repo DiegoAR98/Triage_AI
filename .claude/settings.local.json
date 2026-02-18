@@ -3,7 +3,11 @@
     "allow": [
       "Bash(winget:*)",
       "Bash(pip install:*)",
-      "WebFetch(domain:flagcdn.com)"
+      "WebFetch(domain:flagcdn.com)",
+      "Bash(timeout 10 python:*)",
+      "Bash(python -c:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
