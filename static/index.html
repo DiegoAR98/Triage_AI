@@ -2,22 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e3a5f">
     <title>Triage AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🏥 Triage AI</h1>
-            <p>Manchester Triage Protocol Assessment</p>
+            <div class="header-accent"></div>
+            <div class="header-content">
+                <h1>Triage AI</h1>
+                <p class="header-subtitle">Manchester Triage Protocol</p>
+            </div>
+            <div id="header-status" class="header-status"></div>
         </header>
 
         <!-- Chat Screen -->
         <main id="chat-screen" class="screen">
             <div id="chat-messages" class="chat-messages">
                 <!-- Messages will be inserted here -->
+            </div>
+
+            <div id="chat-progress" class="chat-progress hidden">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <span id="progress-text" class="progress-text"></span>
             </div>
 
             <form id="chat-form" class="chat-input-form">
@@ -28,7 +45,13 @@
                     autocomplete="off"
                     required
                 >
-                <button type="submit" id="send-btn">Send</button>
+                <button type="submit" id="send-btn" aria-label="Send">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    <span class="send-text">Send</span>
+                </button>
             </form>
         </main>
 
@@ -38,6 +61,20 @@
                 <div class="spinner"></div>
                 <h2 id="processing-title">Processing your information...</h2>
                 <p id="processing-subtitle">Our AI agents are analyzing your symptoms</p>
+                <div class="processing-steps">
+                    <div class="step" id="step-1">
+                        <span class="step-indicator"></span>
+                        <span class="step-text" data-step="1">Analyzing patient data</span>
+                    </div>
+                    <div class="step" id="step-2">
+                        <span class="step-indicator"></span>
+                        <span class="step-text" data-step="2">Classifying urgency level</span>
+                    </div>
+                    <div class="step" id="step-3">
+                        <span class="step-indicator"></span>
+                        <span class="step-text" data-step="3">Determining department routing</span>
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -10,6 +10,8 @@ let sessionId = null;
 let isComplete = false;
 let currentLanguage = 'en';
 let isLanguageSelection = false;
+let currentQuestion = 0;
+const totalQuestions = 14;
 
 // DOM Elements
 const chatScreen = document.getElementById('chat-screen');
@@ -21,6 +23,10 @@ const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 const newTriageBtn = document.getElementById('new-triage-btn');
 const resultContent = document.getElementById('result-content');
+const headerStatus = document.getElementById('header-status');
+const chatProgress = document.getElementById('chat-progress');
+const progressFill = document.getElementById('progress-fill');
+const progressText = document.getElementById('progress-text');
 
 // Translations for UI elements
 const translations = {
@@ -33,7 +39,15 @@ const translations = {
         errorProcess: 'Error processing your information. Please try again or start a new session.',
         typeAnswer: 'Type your answer...',
         send: 'Send',
-        newTriage: 'Start New Triage'
+        newTriage: 'Start New Triage',
+        sessionActive: 'Session Active',
+        questionOf: 'Question {current} of {total}',
+        triageComplete: 'Triage Complete',
+        step1: 'Analyzing patient data',
+        step2: 'Classifying urgency level',
+        step3: 'Determining department routing',
+        processingTitle: 'Processing your information...',
+        processingSubtitle: 'Our AI agents are analyzing your symptoms'
     },
     es: {
         welcome: 'Bienvenido a Triage AI. Le haré algunas preguntas para entender sus síntomas y ayudarle a recibir la atención adecuada.',
@@ -44,7 +58,15 @@ const translations = {
         errorProcess: 'Error al procesar su información. Por favor, inténtelo de nuevo o inicie una nueva sesión.',
         typeAnswer: 'Escriba su respuesta...',
         send: 'Enviar',
-        newTriage: 'Iniciar Nuevo Triage'
+        newTriage: 'Iniciar Nuevo Triage',
+        sessionActive: 'Sesión Activa',
+        questionOf: 'Pregunta {current} de {total}',
+        triageComplete: 'Triage Completado',
+        step1: 'Analizando datos del paciente',
+        step2: 'Clasificando nivel de urgencia',
+        step3: 'Determinando derivación departamental',
+        processingTitle: 'Procesando su información...',
+        processingSubtitle: 'Nuestros agentes de IA están analizando sus síntomas'
     },
     'pt-BR': {
         welcome: 'Bem-vindo ao Triage AI. Farei algumas perguntas para entender seus sintomas e ajudá-lo a receber o atendimento adequado.',
@@ -55,7 +77,15 @@ const translations = {
         errorProcess: 'Erro ao processar suas informações. Por favor, tente novamente ou inicie uma nova sessão.',
         typeAnswer: 'Digite sua resposta...',
         send: 'Enviar',
-        newTriage: 'Iniciar Novo Triage'
+        newTriage: 'Iniciar Novo Triage',
+        sessionActive: 'Sessão Ativa',
+        questionOf: 'Pergunta {current} de {total}',
+        triageComplete: 'Triagem Concluída',
+        step1: 'Analisando dados do paciente',
+        step2: 'Classificando nível de urgência',
+        step3: 'Determinando encaminhamento departamental',
+        processingTitle: 'Processando suas informações...',
+        processingSubtitle: 'Nossos agentes de IA estão analisando seus sintomas'
     },
     it: {
         welcome: 'Benvenuto a Triage AI. Le farò alcune domande per comprendere i suoi sintomi e aiutarla a ricevere le cure appropriate.',
@@ -66,7 +96,15 @@ const translations = {
         errorProcess: 'Errore nell\'elaborazione delle informazioni. Per favore, riprova o avvia una nuova sessione.',
         typeAnswer: 'Scrivi la tua risposta...',
         send: 'Invia',
-        newTriage: 'Inizia Nuovo Triage'
+        newTriage: 'Inizia Nuovo Triage',
+        sessionActive: 'Sessione Attiva',
+        questionOf: 'Domanda {current} di {total}',
+        triageComplete: 'Triage Completato',
+        step1: 'Analisi dei dati del paziente',
+        step2: 'Classificazione del livello di urgenza',
+        step3: 'Determinazione dell\'indirizzamento dipartimentale',
+        processingTitle: 'Elaborazione delle informazioni in corso...',
+        processingSubtitle: 'I nostri agenti IA stanno analizzando i suoi sintomi'
     }
 };
 
@@ -87,6 +125,57 @@ function t(key) {
 }
 
 /**
+ * Update progress bar
+ */
+function updateProgress(questionNumber) {
+    currentQuestion = questionNumber;
+    if (questionNumber <= 0) {
+        chatProgress.classList.add('hidden');
+        return;
+    }
+    chatProgress.classList.remove('hidden');
+    const percent = Math.round((questionNumber / totalQuestions) * 100);
+    progressFill.style.width = percent + '%';
+    const text = t('questionOf')
+        .replace('{current}', questionNumber)
+        .replace('{total}', totalQuestions);
+    progressText.textContent = text;
+    headerStatus.textContent = text;
+}
+
+/**
+ * Animate processing steps sequentially
+ */
+function animateProcessingSteps() {
+    const steps = [
+        document.getElementById('step-1'),
+        document.getElementById('step-2'),
+        document.getElementById('step-3')
+    ];
+
+    // Set translated text
+    const stepKeys = ['step1', 'step2', 'step3'];
+    steps.forEach((step, i) => {
+        const textEl = step.querySelector('.step-text');
+        textEl.textContent = t(stepKeys[i]);
+        step.classList.remove('active', 'completed');
+    });
+
+    // Animate steps with delays
+    const delays = [0, 3000, 7000];
+    delays.forEach((delay, i) => {
+        setTimeout(() => {
+            // Mark previous steps as completed
+            for (let j = 0; j < i; j++) {
+                steps[j].classList.remove('active');
+                steps[j].classList.add('completed');
+            }
+            steps[i].classList.add('active');
+        }, delay);
+    });
+}
+
+/**
  * Start a new triage session
  */
 async function startNewSession() {
@@ -95,10 +184,13 @@ async function startNewSession() {
     isComplete = false;
     currentLanguage = 'en';
     isLanguageSelection = false;
+    currentQuestion = 0;
     chatMessages.innerHTML = '';
 
     // Show chat screen
     showScreen('chat');
+    updateProgress(0);
+    headerStatus.textContent = '';
 
     // Add welcome message in English (default)
     addMessage('agent', translations.en.welcome);
@@ -201,9 +293,10 @@ async function selectLanguage(languageCode) {
         const data = await response.json();
         isLanguageSelection = false;
 
-        // Show first question
+        // Show first question and update progress
         setTimeout(() => {
             addMessage('agent', data.next_question);
+            updateProgress(1);
             setInputEnabled(true);
             userInput.focus();
         }, 300);
@@ -220,8 +313,10 @@ async function selectLanguage(languageCode) {
  */
 function updateUILanguage() {
     userInput.placeholder = t('typeAnswer');
-    sendBtn.textContent = t('send');
+    const sendText = sendBtn.querySelector('.send-text');
+    if (sendText) sendText.textContent = t('send');
     newTriageBtn.textContent = t('newTriage');
+    headerStatus.textContent = t('sessionActive');
 }
 
 /**
@@ -259,9 +354,10 @@ async function handleSubmit(e) {
             addMessage('system', t('processing'));
             setTimeout(() => processTriageResult(), 1000);
         } else {
-            // Show next question
+            // Show next question and update progress
             setTimeout(() => {
                 addMessage('agent', data.next_question);
+                updateProgress(data.question_number || currentQuestion + 1);
                 setInputEnabled(true);
                 userInput.focus();
             }, 300);
@@ -281,19 +377,11 @@ async function processTriageResult() {
     showScreen('processing');
 
     // Update processing screen text based on language
-    document.getElementById('processing-title').textContent = {
-        'en': 'Processing your information...',
-        'es': 'Procesando su información...',
-        'pt-BR': 'Processando suas informações...',
-        'it': 'Elaborazione delle informazioni in corso...'
-    }[currentLanguage] || 'Processing your information...';
+    document.getElementById('processing-title').textContent = t('processingTitle');
+    document.getElementById('processing-subtitle').textContent = t('processingSubtitle');
 
-    document.getElementById('processing-subtitle').textContent = {
-        'en': 'Our AI agents are analyzing your symptoms',
-        'es': 'Nuestros agentes de IA están analizando sus síntomas',
-        'pt-BR': 'Nossos agentes de IA estão analisando seus sintomas',
-        'it': 'I nostri agenti IA stanno analizzando i suoi sintomi'
-    }[currentLanguage] || 'Our AI agents are analyzing your symptoms';
+    // Start step animation
+    animateProcessingSteps();
 
     try {
         // Start processing
@@ -333,13 +421,6 @@ async function processTriageResult() {
  */
 function displayResult(result) {
     const { classification, routing, anamnesis } = result;
-
-    const colorEmoji = {
-        'RED': '🔴',
-        'YELLOW': '🟡',
-        'GREEN': '🟢',
-        'BLUE': '🔵',
-    };
 
     const labels = {
         en: {
@@ -438,9 +519,27 @@ function displayResult(result) {
 
     const l = labels[currentLanguage] || labels.en;
 
+    // Format timestamp
+    let timestampStr = '';
+    if (result.timestamp) {
+        const date = new Date(result.timestamp);
+        timestampStr = date.toLocaleString(currentLanguage === 'pt-BR' ? 'pt-BR' : currentLanguage, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
     let html = `
+        <div class="result-header">
+            <h2>${t('triageComplete')}</h2>
+            ${timestampStr ? `<p class="result-timestamp">${timestampStr}</p>` : ''}
+        </div>
+
         <div class="triage-badge ${classification.color}">
-            <h2>${colorEmoji[classification.color]} ${classification.color} - ${classification.priority}</h2>
+            <h2>${classification.color} — ${classification.priority}</h2>
             <p class="priority">${getWaitTime(classification.color)}</p>
         </div>
 
@@ -465,18 +564,18 @@ function displayResult(result) {
                 <p><strong>${l.associatedSymptoms}:</strong> ${anamnesis.associated_symptoms.join(', ')}</p>
             ` : ''}
             ${anamnesis.allergies && anamnesis.allergies.length > 0 ? `
-                <p><strong>${l.allergies}:</strong> <span style="color: #dc2626;">${anamnesis.allergies.join(', ')}</span></p>
+                <p><strong>${l.allergies}:</strong> <span style="color: var(--color-red); font-weight: 600;">${anamnesis.allergies.join(', ')}</span></p>
             ` : ''}
         </div>
 
-        <div class="result-section">
+        <div class="result-section section-routing">
             <h3>${l.routing}</h3>
             <p><strong>${l.department}:</strong> ${routing.department}</p>
             <p><strong>${l.urgency}:</strong> ${routing.urgency}</p>
             ${routing.room_type ? `<p><strong>${l.roomType}:</strong> ${routing.room_type}</p>` : ''}
         </div>
 
-        <div class="result-section">
+        <div class="result-section section-classification">
             <h3>${l.classificationReasoning}</h3>
             <p>${classification.reasoning}</p>
             ${classification.risk_factors.length > 0 ? `
@@ -490,7 +589,7 @@ function displayResult(result) {
 
     if (routing.preliminary_orders.length > 0) {
         html += `
-            <div class="result-section">
+            <div class="result-section section-orders">
                 <h3>${l.preliminaryOrders}</h3>
                 <ul>
                     ${routing.preliminary_orders.map(o => `<li>${o}</li>`).join('')}
