@@ -14,6 +14,7 @@ let currentQuestion = 0;
 const totalQuestions = 14;
 
 // DOM Elements
+const landingScreen = document.getElementById('landing-screen');
 const chatScreen = document.getElementById('chat-screen');
 const processingScreen = document.getElementById('processing-screen');
 const resultScreen = document.getElementById('result-screen');
@@ -108,14 +109,9 @@ const translations = {
     }
 };
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    startNewSession();
-});
-
 // Event Listeners
 chatForm.addEventListener('submit', handleSubmit);
-newTriageBtn.addEventListener('click', startNewSession);
+newTriageBtn.addEventListener('click', goToLanding);
 
 /**
  * Get translated text for current language
@@ -668,14 +664,43 @@ function addMessage(type, text) {
 }
 
 /**
+ * Start triage from landing page
+ */
+function startTriage() {
+    landingScreen.classList.add('landing-exit');
+
+    setTimeout(() => {
+        landingScreen.classList.add('hidden');
+        landingScreen.classList.remove('landing-exit');
+        document.querySelector('.header').classList.remove('hidden');
+        document.querySelector('.header').classList.add('header-enter');
+        showScreen('chat');
+        startNewSession();
+    }, 400);
+}
+
+/**
+ * Return to landing page
+ */
+function goToLanding() {
+    document.querySelector('.header').classList.add('hidden');
+    document.querySelector('.header').classList.remove('header-enter');
+    showScreen('landing');
+}
+
+/**
  * Show a specific screen
  */
 function showScreen(screen) {
+    landingScreen.classList.add('hidden');
     chatScreen.classList.add('hidden');
     processingScreen.classList.add('hidden');
     resultScreen.classList.add('hidden');
 
     switch (screen) {
+        case 'landing':
+            landingScreen.classList.remove('hidden');
+            break;
         case 'chat':
             chatScreen.classList.remove('hidden');
             break;

@@ -615,6 +615,203 @@ body {
 }
 
 /* ==============================
+   LANDING PAGE
+   ============================== */
+
+.landing {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 2.5rem 1.5rem;
+    align-items: center;
+    text-align: center;
+}
+
+/* Hero */
+.landing-hero {
+    padding-bottom: 2.5rem;
+}
+
+.landing-logo {
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+}
+
+.landing-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+}
+
+.landing-tagline {
+    font-size: 1.0625rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+}
+
+.landing-description {
+    font-size: 0.9375rem;
+    color: var(--color-text-light);
+    line-height: 1.7;
+    max-width: 440px;
+    margin: 0 auto 1.75rem;
+}
+
+.landing-cta {
+    display: inline-block;
+    padding: 0.875rem 2.5rem;
+    background-color: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-xl);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.landing-cta:hover {
+    background-color: #005f8f;
+}
+
+.landing-cta:active {
+    transform: scale(0.98);
+}
+
+.landing-cta:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Sections */
+.landing-section {
+    width: 100%;
+    max-width: 520px;
+    padding: 2rem 0;
+}
+
+.landing-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+/* How It Works - Steps */
+.steps-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.step-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.step-icon {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+.step-card h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+}
+
+.step-card p {
+    font-size: 0.8125rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+}
+
+/* Key Features */
+.features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.feature-card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.125rem;
+    text-align: left;
+}
+
+.feature-icon {
+    display: inline-block;
+    color: var(--color-accent);
+    margin-bottom: 0.625rem;
+}
+
+.feature-card h3 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+}
+
+.feature-card p {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+}
+
+/* Footer CTA */
+.landing-footer {
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+}
+
+.landing-footer .landing-cta {
+    margin-bottom: 1rem;
+}
+
+.landing-credits {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    opacity: 0.7;
+}
+
+/* Landing Transition Animations */
+.landing-exit {
+    animation: landingFadeOut 0.4s ease-out forwards;
+}
+
+@keyframes landingFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.header-enter {
+    animation: headerFadeIn 0.3s ease-in 0.15s forwards;
+    opacity: 0;
+}
+
+@keyframes headerFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* ==============================
    ACCESSIBILITY
    ============================== */
 
@@ -674,6 +871,19 @@ body {
     .language-buttons {
         grid-template-columns: 1fr;
         max-width: 90%;
+    }
+
+    /* Landing - Phone */
+    .landing {
+        padding: 2rem 1rem;
+    }
+
+    .landing-title {
+        font-size: 1.625rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
     }
 
     .result-content {
@@ -739,6 +949,19 @@ body {
         max-width: 360px;
     }
 
+    /* Landing - Wide Tablet */
+    .landing {
+        padding: 3rem 2rem;
+    }
+
+    .landing-title {
+        font-size: 2.25rem;
+    }
+
+    .landing-section {
+        max-width: 560px;
+    }
+
     .btn-primary {
         width: calc(100% - 3rem);
         margin-left: 1.5rem;
@@ -756,7 +979,8 @@ body {
     .chat-input-form,
     .chat-progress,
     .btn-primary,
-    #send-btn {
+    #send-btn,
+    .landing {
         display: none !important;
     }
 
